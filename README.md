@@ -31,7 +31,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Windows users can also double-click `run.bat`.
+Windows users can also double-click 
 
 ## Project structure
 
@@ -40,7 +40,6 @@ SnapShield-AI/
 ├── app.py
 ├── data.csv
 ├── requirements.txt
-├── run.bat
 ├── README.md
 └── docs/
     ├── ARCHITECTURE.md
