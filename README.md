@@ -31,8 +31,6 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Windows users can also double-click 
-
 ## Project structure
 
 ```text
