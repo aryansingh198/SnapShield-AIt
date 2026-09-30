@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SnapShield AI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#06171a;color:#eef8f6;font-family:Inter,Segoe UI,Arial,sans-serif}
+.wrap{max-width:1050px;margin:auto;padding:34px 22px}.brand{color:#7ee28e;font-weight:800;letter-spacing:1.5px;font-size:13px}
+h1{font-size:38px;margin:8px 0}.sub{color:#9db9bc;margin-bottom:24px}.panel{background:#0d2a2e;border:1px solid #28545a;border-radius:18px;padding:24px;box-shadow:0 16px 45px #0005}
+textarea{width:100%;height:150px;background:#061316;border:1px solid #35565a;border-radius:12px;color:white;padding:16px;font-size:16px;resize:vertical;outline:none}
+button{margin-top:14px;background:#7ee28e;border:0;border-radius:10px;padding:13px 20px;font-weight:800;color:#062015;cursor:pointer}
+.result{margin-top:18px;border-radius:14px;padding:18px;background:#102f33}.risk{font-size:26px;font-weight:900}.low{color:#7ee28e}.medium{color:#f8b137}.high{color:#ff7070}.score{color:#c5dadd;margin-top:4px}.why{margin-top:14px;color:#c5dadd}.why div{padding:7px 0;border-bottom:1px solid #21464b}
+.footer{color:#78999d;font-size:12px;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="brand">SNAPSHIELD AI</div>
+<h1>Private On-Device Scam & Phishing Detector</h1>
+<div class="sub">Local-first analysis • Explainable results • Snapdragon-ready deployment path</div>
+<div class="panel">
+<label for="msg"><b>Paste a suspicious message, email snippet or URL</b></label>
+<textarea id="msg" placeholder="Example: Urgent! Your bank account will be blocked. Verify your password and OTP now."></textarea>
+<button onclick="analyze()">Analyze Locally</button>
+<div class="result" id="result"><div class="risk">READY</div><div class="score">Enter a message to begin.</div></div>
+<div class="why" id="why"></div>
+</div>
+<div class="footer">Demo UI. Production validation requires representative data, adversarial testing and target-device profiling.</div>
+</div>
+<script>
+const weights={otp:12,password:12,verify:8,urgent:7,blocked:10,suspended:10,prize:9,winner:9,claim:6,refund:8,fee:7,click:5,bank:6,card:8,cvv:14,pin:14,crypto:8,wallet:8};
+function analyze(){
+ const t=document.getElementById('msg').value.trim(), lo=t.toLowerCase();
+ if(!t){document.getElementById('result').innerHTML='<div class="risk">READY</div><div class="score">Enter a message to begin.</div>';document.getElementById('why').innerHTML='';return}
+ let score=0,reasons=[],hits=[];
+ for(const k in weights) if(lo.includes(k)){score+=weights[k];hits.push(k)}
+ if(hits.length) reasons.push("Risk language: "+hits.slice(0,7).join(", "));
+ const urls=lo.match(/(?:https?:\/\/|www\.)\S+/g)||[];
+ urls.forEach(u=>{if(u.startsWith("http://")){score+=8;reasons.push("Link does not use HTTPS.")}if(u.includes("@")){score+=12;reasons.push("URL contains an @ symbol.")}if(/\d{1,3}(?:\.\d{1,3}){3}/.test(u)){score+=14;reasons.push("URL uses a raw IP address.")}if(u.length>75){score+=8;reasons.push("URL is unusually long.")}});
+ if(/(send|share).{0,20}(otp|cvv|pin|password)/i.test(lo)){score+=15;reasons.push("Requests sensitive authentication/payment information.")}
+ score=Math.min(99,score+Math.min(30,t.length>80?15:5));
+ let risk=score>=70?"HIGH":score>=40?"MEDIUM":"LOW", cls=risk.toLowerCase();
+ document.getElementById('result').innerHTML=`<div class="risk ${cls}">${risk}</div><div class="score">Risk score: ${score}/99</div>`;
+ if(!reasons.length) reasons=["No strong suspicious signal was detected by the demo rules."];
+ document.getElementById('why').innerHTML=reasons.map(x=>`<div>• ${x}</div>`).join("");
+}
+</script>
+</body>
+</html>
